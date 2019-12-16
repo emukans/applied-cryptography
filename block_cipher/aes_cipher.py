@@ -1,4 +1,3 @@
-import os
 from typing import Tuple
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -57,6 +56,7 @@ class AESCypher:
         cmac_instance = cmac.CMAC(algorithms.AES(key), backend=default_backend())
         cmac_instance.update(ct)
         cmac_instance.verify(mac)
+        print(f'MAC has been verified')
 
         buf = bytearray(len(ct) + self.block_size - 1)
         decryptor = self.cipher.decryptor()
