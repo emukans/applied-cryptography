@@ -132,4 +132,6 @@ dmypy.json
 block_cipher/secret
 block_cipher/iv
 x509/*.pem
+x509/decrypted_message
+x509/encrypted_message
 

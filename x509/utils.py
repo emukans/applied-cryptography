@@ -69,3 +69,34 @@ def verify(cert_bytes, private_key_bytes, issuer):
     name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, issuer)])
     if name != cert.issuer or name != cert.subject:
         raise ValueError('Issuer or subject is invalid')
+
+
+def encrypt(private_key_bytes, message):
+    private_key = load_pem_private_key(private_key_bytes, None, default_backend())
+    public_key = private_key.public_key()
+
+    encrypted = public_key.encrypt(
+        bytes(message),
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    return encrypted
+
+
+def decrypt(private_key_bytes, message):
+    private_key = load_pem_private_key(private_key_bytes, None, default_backend())
+
+    original_message = private_key.decrypt(
+        message,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    return original_message
