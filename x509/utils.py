@@ -1,10 +1,14 @@
 from datetime import datetime, timedelta
 from cryptography import x509
+from cryptography.exceptions import InvalidSignature
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from cryptography.hazmat.primitives.asymmetric import padding
 
 
 def build_certificate(issuer):
@@ -17,7 +21,7 @@ def build_certificate(issuer):
         backend=default_backend(),
     )
     public_key = private_key.public_key()
-    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, issuer), ])
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, issuer)])
     cert = (
         x509.CertificateBuilder()
         .subject_name(name)
@@ -39,6 +43,10 @@ def build_certificate(issuer):
         )
     )
 
+    public_pem = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
     cert_pem = cert.public_bytes(encoding=serialization.Encoding.PEM)
     key_pem = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
@@ -46,4 +54,22 @@ def build_certificate(issuer):
         encryption_algorithm=serialization.NoEncryption(),
     )
 
-    return cert_pem, key_pem
+    return public_pem, key_pem, cert_pem
+
+
+def verify(cert_bytes, public_key_bytes, issuer):
+    public_key = load_pem_public_key(public_key_bytes, default_backend())
+    cert = x509.load_pem_x509_certificate(cert_bytes, default_backend())
+    try:
+        public_key.verify(
+            cert.signature,
+            cert.tbs_certificate_bytes,
+            padding.PKCS1v15(),
+            cert.signature_hash_algorithm
+        )
+    except InvalidSignature:
+        raise ValueError('Certificate signature is invalid')
+
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, issuer)])
+    if name != cert.issuer or name != cert.subject:
+        raise ValueError('Issuer or subject is invalid')
