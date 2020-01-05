@@ -19,3 +19,29 @@
     ```shell script
     python -m block_cipher
     ```
+   
+## X.509 certificate generation (HW 2, task 1)
+1. (Optional) Change ISSUER variable in `x509/env` file. The value will be used in X.509 certification generation
+2. Generate certificate
+    ```shell script
+    python -m x509 generate 
+    ```
+
+## X.509 certificate verification (HW 2, task 2)
+1. Run a shell script
+    ```shell script
+    python -m x509 verify
+    ```
+   In case of failure, you will see an error message, that signature or issuer/subject is incorrect.
+   
+## X.509 message encrypt/decrypt (HW 2, task 3)
+1. Put a message into `x509/message.txt` file
+2. Run a shell script to encrypt the message
+    ```shell script
+    python -m x509 encrypt
+    ```
+3. To decrypt the message run command
+    ```shell script
+    python -m x509 decrypt
+    ```
+    The initial message will appear in the terminal and will be stored in binary format in `x509/decrypted_message`
