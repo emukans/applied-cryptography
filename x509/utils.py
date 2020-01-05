@@ -6,7 +6,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.asymmetric import padding
 
@@ -43,10 +42,6 @@ def build_certificate(issuer):
         )
     )
 
-    public_pem = public_key.public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
-    )
     cert_pem = cert.public_bytes(encoding=serialization.Encoding.PEM)
     key_pem = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
@@ -54,11 +49,12 @@ def build_certificate(issuer):
         encryption_algorithm=serialization.NoEncryption(),
     )
 
-    return public_pem, key_pem, cert_pem
+    return key_pem, cert_pem
 
 
-def verify(cert_bytes, public_key_bytes, issuer):
-    public_key = load_pem_public_key(public_key_bytes, default_backend())
+def verify(cert_bytes, private_key_bytes, issuer):
+    private_key = load_pem_private_key(private_key_bytes, None, default_backend())
+    public_key = private_key.public_key()
     cert = x509.load_pem_x509_certificate(cert_bytes, default_backend())
     try:
         public_key.verify(
