@@ -131,4 +131,5 @@ dmypy.json
 # Project specific files
 block_cipher/secret
 block_cipher/iv
+x509/*.pem
 

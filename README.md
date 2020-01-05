@@ -4,6 +4,7 @@
 1. Python 3.7 (Tested on 3.7.5)
 2. cryptography 2.8
 3. click 7.0
+3. python-dotenv 0.10
 
 ## Prerequisites
 1. Python dependencies. Can be installed via pipenv or pip.
